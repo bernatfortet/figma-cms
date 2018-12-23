@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bernatfortet/figma-cms.svg?branch=master)](https://travis-ci.org/bernatfortet/figma-cms)
+
 # figma-csm
 Use Figma as a CMS
 

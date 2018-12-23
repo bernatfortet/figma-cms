@@ -6,7 +6,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "mocha --reporter spec"
+    "test": "mocha -r ts-node/register test/**/*.ts",
+    "test:watch": "mocha -r ts-node/register --watch-extensions ts --watch test/**/*.ts",
+    "prepare": "yarn run build && npm version patch",
+    "release": "npm publish"
   },
   "repository": {
     "type": "git",
@@ -19,10 +22,12 @@
   },
   "license": "N/A",
   "dependencies": {
-    "axios": "^0.18.0"
+    "@types/jest": "^23.3.10",
+    "axios": "^0.18.0",
+    "jest": "^23.6.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^5.2.0"
+    "ts-jest": "^23.10.5",
+    "ts-node": "^7.0.1"
   }
 }
