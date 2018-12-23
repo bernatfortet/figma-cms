@@ -1,0 +1,23 @@
+{
+  "name": "figma-cms",
+  "version": "0.0.1",
+  "description": "Use Figma as a CMS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "the repositories url"
+  },
+  "author": "Bernat Fortet Unanue <bernatfortet@gmail.com>",
+  "homepage": "https://github.com/bernatfortet/figma-cms#readme",
+  "bugs": {
+    "url": "https://github.com/bernatfortet/figma-cms/issues"
+  },
+  "license": "N/A",
+  "dependencies": {
+    "axios": "^0.18.0"
+  }
+}
