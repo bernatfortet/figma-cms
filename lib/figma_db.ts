@@ -1,6 +1,6 @@
 // import { downloadImages } from './downloadImages'
 import * as figma from './figma'
-import { convertTextElementToMarkdown } from './figmaToMarkdown'
+import { convertTextObjectToMarkdown } from './figmaToMarkdown'
 
 const REFETCH_IMAGES = false
 
@@ -65,7 +65,7 @@ const parseElements = ( elements ) => {
   bodyElements.sort(sortByPosition).map( el => {
       
     if( el.type == 'TEXT')
-      return body.push( { type: 'text', text: convertTextElementToMarkdown(el) })
+      return body.push( { type: 'text', text: convertTextObjectToMarkdown(el) })
       
     if( isVideo(el) )
       return body.push(getVideoObject(el))

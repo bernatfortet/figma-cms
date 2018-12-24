@@ -6,8 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "mocha -r ts-node/register test/**/*.ts",
-    "test:watch": "mocha -r ts-node/register --watch-extensions ts --watch test/**/*.ts",
+    "test": "nodemon --watch 'lib/**/*.ts' --exec 'ts-node' lib/tests.ts",
     "prepare": "yarn run build && npm version patch",
     "release": "npm publish"
   },

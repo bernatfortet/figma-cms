@@ -1,4 +1,4 @@
-export function convertTextElementToMarkdown(el: any) {
+export function convertTextObjectToMarkdown(el: any) {
   // TODO expand styling to any style instead of only bolding
   const defaultStyleIsBold = el.style.fontWeight > 400
   
