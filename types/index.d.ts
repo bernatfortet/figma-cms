@@ -42,7 +42,7 @@ export type CanvasObject = ChildProps & {
   prototypeStartNodeID: null | string,
 }
 
-export type Elements = TextObject | FrameObject
+export type Elements = TextObject | FrameObject | GroupObject
 
 type ElementProps = ChildProps & {
   blendMode: BlendMode,
@@ -50,8 +50,13 @@ type ElementProps = ChildProps & {
 
 export type FrameObject = ElementProps & {
   type: 'FRAME'
-  blendMode: BlendMode,
   children: Elements[],
+} 
+
+export type GroupObject = ElementProps & {
+  type: 'GROUP'
+  children: Elements[],
+  clipsContent: boolean,
 } 
 
 export type TextObject = ElementProps & {

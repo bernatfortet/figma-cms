@@ -1,0 +1,1 @@
+export { fetchFigma, getSeries, Figma } from './figma'

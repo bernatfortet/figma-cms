@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { FigmaFile, CanvasObject, FrameObject, Elements, TextObject } from './types'
+import { FigmaFile, CanvasObject, GroupObject, FrameObject, Elements, TextObject } from '../types'
 
 
 type FigmaClientOptions = {
@@ -30,6 +30,19 @@ class FigmaClient {
     return file
   }
 
+  async fetchImages(imageIds: string[]): Promise<string[]> {
+    const parsedImageIds = imageIds.join(',')
+    const result: any = await fetch(`images/${this.fileKey}?ids=${parsedImageIds}`)  // TODO improve rsult Type
+    return result.images
+  }
+
+  async fetchFileImages(fileKey) {
+    try {
+      const result: any = await fetch(`files/${fileKey}/images`) // TODO improve rsult Type
+      return result.meta.images
+    } catch (e) { throw ('No Images found') }
+  }
+
   fetch(endpoint: string) {
     const options = {
       method: 'GET',
@@ -46,7 +59,7 @@ class FigmaClient {
 
 }
 
-class Figma {
+export class Figma {
   file: FigmaFile
 
   constructor(file: FigmaFile) {
@@ -66,6 +79,7 @@ export class Canvas {
   canvas: CanvasObject
   constructor(canvas: CanvasObject)  {
     this.canvas = canvas
+    return this
   }
 
   getFrame(frameName: string): Frame {
@@ -73,13 +87,14 @@ export class Canvas {
     if (frame == null || frame == undefined) throw ('Frame was not found')
     return new Frame(frame as FrameObject)
   }
-}
 
+}
 
 export class Frame {
   frame: FrameObject
   constructor(frame: FrameObject) {
     this.frame = frame
+    return this
   }
 
   getElement(elementName: string) {
@@ -90,7 +105,15 @@ export class Frame {
       default:
       case 'TEXT': return new Text(element as TextObject)
     }
-    
+  }
+
+  /**
+   * Returns an array of objects based on the schema provided.
+   * Only works with figma container elements (Frame, Group and Canvas)
+   * @param schema array of any kind of object
+   */
+  getSeries(schema: any[]) {
+    return getSeries(this.frame, schema)
   }
 }
 
@@ -99,10 +122,12 @@ export class Text {
 
   constructor(TextObject: TextObject) {
     this.element = TextObject
+    return this
   }
 
+  /** Return the plain text chracters of a figma text element  */
   getCharacters() {
-    return this.element.characters
+    return convertTextObjectToMarkdown(this.element)
   }
 }
 
@@ -117,25 +142,82 @@ export function parseValueProps( website ){
 }
 
 
-export function parseBannerTitle( website ){
-  const banner = website.children.find(i => i.name == 'Banner')
-  return banner.children.find( i => i.name == 'title' ).characters
+/**
+ * Returns an array of objects based on the schema provided.
+ * Only works with figma container elements (Frame, Group and Canvas)
+ */
+
+export function getSeries( container: FrameObject | GroupObject | CanvasObject, schema: any[] ) { // TODO use generics
+  const series = container.children.sort(sortByPositionY).map( child => {
+    const obj = {}
+    schema.forEach( itemName => {
+      if ( child.type == 'TEXT' ) return  // TODO don't know why typescript doens't allow me to do eg: !(child.type == 'FRAME')
+      const item = child.children.find(el => el.name == itemName )
+      if (item == null || item == undefined) {
+        return console.info( `${itemName} doesn't exist in this container`)
+      }
+      switch (item.type) {
+        case 'TEXT': obj[itemName] = new Text(item).getCharacters()
+        default: return
+      }
+      
+    })
+    return obj
+  })
+
+  return series
 }
 
 
 const sortedByName = (a, b ) => a.name > b.name
 
 
+export function convertTextObjectToMarkdown(el: TextObject) {
+  // Figma styling is some kind of black magic I don't understand...
+  // TODO expand styling to any style instead of only bolding
+  const defaultStyleIsBold = el.style.fontWeight > 400
 
-  // async function fetchImages(imageIds) {
-  //   const parsedImageIds = imageIds.join(',')
-  //   const result = await fetchFigma(`images/${FILE_KEY}?ids=${parsedImageIds}`)
-  //   return result.images
-  // }
+  const boldStyleKeys = Object.entries(el.styleOverrideTable)
+    .filter((i: any) => i[1].fontWeight > 400)
+    .map(i => parseInt(i[0]))
+  if (defaultStyleIsBold) boldStyleKeys.push(0)
 
-  // async function fetchFileImages(fileKey) {
-  //   const result = await fetchFigma(`files/${fileKey}/images`)
-  //   if (result.error) throw ('File not found')
-  //   if (!result.meta || !result.meta.images) throw ('No Images found')
-  //   return result.meta.images
-  // }
+  let chars = el.characters
+
+  const isChardBold = (charKey: number) => {
+    if (charKey < 0 || charKey === undefined) return false
+    const char = chars[charKey]
+    if (char === '\n') return false
+    const charStyleKey = el.characterStyleOverrides[charKey]
+    return boldStyleKeys.includes(charStyleKey)
+  }
+
+  let mdStr = ''
+
+  for (var i = 0; i < chars.length; i++) {
+    const c = chars[i]
+    const isBold = isChardBold(i)
+    const isPrevCharBold = isChardBold(i - 1)
+    const isNewLine = chars[i] === '\n'
+
+    if (isNewLine && isPrevCharBold) mdStr += "**" + c
+    else if (isBold && !isPrevCharBold) mdStr += "**" + c
+    else if (!isBold && isPrevCharBold) mdStr += "**" + c
+    else if (isBold && i === chars.length - 1) mdStr += c + "**"
+    else mdStr += c
+  }
+
+  return mdStr
+}
+
+
+const sortByPosition = ( A, B, axis ='y' ) => { // TODO add typings 
+  const a = A.absoluteBoundingBox
+  const b = B.absoluteBoundingBox
+  return a[axis] - b[axis]
+}
+
+const sortByPositionX = (a, b) => sortByPosition(a, b, 'x')
+const sortByPositionY = ( a, b) => sortByPosition( a, b, 'y')
+
+// TODO sortByPositionXY = (a, b) => sortByPosition( a, b)

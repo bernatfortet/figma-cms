@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "nodemon --watch 'lib/**/*.ts' --exec 'ts-node' lib/tests.ts",
+    "test": "nodemon --watch '**/*.ts' --exec 'ts-node' tests/tests.ts",
     "prepare": "yarn run build && npm version patch",
     "release": "npm publish"
   },
