@@ -77,7 +77,8 @@ export class Figma {
 
 export class Canvas {
   canvas: CanvasObject
-  constructor(canvas: CanvasObject)  {
+
+  constructor(canvas: CanvasObject) {
     this.canvas = canvas
     return this
   }
@@ -90,16 +91,29 @@ export class Canvas {
 
 }
 
+/** Frame class works for both Frames and Groups in Figma */
 export class Frame {
   frame: FrameObject
+
   constructor(frame: FrameObject) {
     this.frame = frame
     return this
   }
 
-  getElement(elementName: string) {
+  getContainer(elementName: string): Frame {
     const element = this.frame.children.find(el => el.name == elementName)
     if (element == null || element == undefined) throw ('Element was not found')
+
+    if ( !(element.type == 'GROUP' || element.type == 'FRAME')) throw ('Element is not a container')
+
+    return new Frame(element as FrameObject)
+  }
+
+  getElement(elementName: string): Text {
+    const element = this.frame.children.find(el => el.name == elementName)
+    if (element == null || element == undefined) throw ('Element was not found')
+
+    if (element.type == 'GROUP' || element.type == 'FRAME') throw ('Element is a container use getContainer')
 
     switch (element.type) {
       default:

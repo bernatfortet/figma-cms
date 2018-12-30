@@ -15,10 +15,11 @@ async function test() {
     const figma = await fetchFigma(clientOptions)
     console.log(`loaded`)
 
-    const myCanvas = figma.getCanvas('Pages')
-    const myFrame = myCanvas.getFrame('Services')
+    const canvas = figma.getCanvas('Pages')
+    const frame = canvas.getFrame('Services')
+    const servicesList = frame.getContainer('servicesList')
 
-    const series = myFrame.getSeries(['title', 'description', 'includes'])
+    const series = servicesList.getSeries(['title', 'description', 'includes'])
     console.log(`series`, series.map( s => console.log(`s`, s)))
     
   } catch (e) { console.error(e) }
