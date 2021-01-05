@@ -22,7 +22,7 @@
   "license": "N/A",
   "dependencies": {
     "@types/jest": "^23.3.10",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "jest": "^23.6.0"
   },
   "devDependencies": {
